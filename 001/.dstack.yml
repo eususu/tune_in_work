@@ -11,7 +11,8 @@ env:
   - WANDB_API_KEY
 # Commands of the task
 commands:
-  - accelerate launch -m axolotl.cli.train axolotl/config.yaml
+  - git clone https://github.com/eususu/tune_in_work.git
+  - accelerate launch -m axolotl.cli.train 001/config.yaml
 
 resources:
   gpu:
