@@ -2,54 +2,71 @@ base_model: google/gemma-2-9b-it
 model_type: AutoModelForCausalLM
 tokenizer_type: AutoTokenizer
 
-load_in_8bit: false
-load_in_4bit: false
-strict: false
-
-# huggingface repo
-chat_template: gemma
-datasets:
-  - path: aiyets/agrilla_dpo-7k-filter-ko
-    type: alpaca
-    chat_template: gemma
-    drop_system_message: true
-
-val_set_size: 0.0
-output_dir: ./outputs/out
-
 # save to hugging face
 hub_model_id: aiyets/gemma-2-9b-it-dpo-susu-001
 hub_strategy: every_save
 
-adapter: qlora
-lora_r: 64
-lora_alpha: 64
-lora_dropout: 0.05
-lora_target_linear: true
-
-sequence_len: 2048
-sample_packing: true
-eval_sample_packing: false
-pad_to_sequence_len: true
-
-wandb_project: lovian_dpo_001
+# WANDB
+wandb_project: susu_dpo_001
 wandb_entity:
 wandb_watch:
 wandb_name:
 wandb_log_model:
 
+trust_remote_code: true
 
-gradient_accumulation_steps: 4
+load_in_8bit: true
+load_in_4bit: false
+strict: false
+
+chat_template: chatml
+rl: dpo
+datasets:
+  - path: aiyets/argilla_dpo-mix-7k-filter-ko
+    type: chat_template.default
+    chat_template: chatml
+    field_messages: prompt
+    field_chosen: chosen
+    field_rejected: rejected
+    message_field_role: role
+    message_field_content: content
+    roles:
+      system:
+        - system
+      user:
+        - user
+      assistant:
+        - assistant
+
+dataset_prepared_path:
+val_set_size: 0.01
+output_dir: ./output
+
+adapter: lora
+lora_model_dir:
+
+sequence_len: 2048
+sample_packing: false
+pad_to_sequence_len: false
+
+lora_r: 48
+lora_alpha: 48
+lora_dropout: 0.05
+lora_target_linear: true
+lora_fan_in_fan_out:
+lora_target_modules:
+
+gradient_accumulation_steps: 8
 micro_batch_size: 1
-num_epochs: 4
-optimizer: adamw_bnb_8bit
+num_epochs: 1
+optimizer: paged_adamw_8bit
 lr_scheduler: cosine
-learning_rate: 0.0002
+learning_rate: 1e-5
 
 train_on_inputs: false
 group_by_length: false
-bf16: auto
-fp16:
+bf16: true
+fp16: false
 tf32: true
 
 gradient_checkpointing: true
@@ -60,14 +77,16 @@ logging_steps: 1
 xformers_attention:
 flash_attention: true
 
-warmup_ratio: 0.1
-evals_per_epoch:
+warmup_steps: 50
+evals_per_epoch: 1
 eval_table_size:
-eval_max_new_tokens: 128
-saves_per_epoch: 1
+eval_table_max_new_tokens: 128
+save_steps: 30
+max_steps:
 debug:
 deepspeed:
 weight_decay: 0.0
 fsdp:
 fsdp_config:
 special_tokens:
+
