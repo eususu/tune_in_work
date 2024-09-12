@@ -1,6 +1,6 @@
 type: task
 # The name is optional, if not specified, generated randomly
-name: susu-train-001
+name: susu-dpo-001
 
 # Using the official Axolotl's Docker image
 image: winglian/axolotl-cloud:main-20240429-py3.11-cu121-2.2.1
